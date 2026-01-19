@@ -4,6 +4,5 @@ public class View {
 		this.location = s;
 	}
 	
-	public String location;
-	
+	public String location;	
 }
