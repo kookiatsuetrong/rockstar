@@ -66,9 +66,16 @@ public class Rockstar extends HttpServlet {
 		if (valid(h)) {
 			Object o = h.handle(context);
 			if (o == null) return;
-			if (o instanceof JSONObject) this.send(context, o.toString());
-			if (o instanceof String)     this.send(context, (String)o);
-			if (o instanceof Redirect)   this.send(context, (Redirect)o);
+			
+			if (o instanceof String)   this.send(context, (String)o);
+			if (o instanceof Redirect) this.send(context, (Redirect)o);
+			
+			if (o instanceof JSONObject) {			
+				context.response.setHeader("Content-Type", 
+								"application/json; charset=utf-8");
+				this.send(context, o.toString());
+			}
+			
 			return;
 		}
 		
@@ -149,8 +156,6 @@ public class Rockstar extends HttpServlet {
 	}
 	
 	public void send(Context context, int code, String text) {
-		// context.response.setHeader("Content-Type", 
-		//                  "application/json; charset=utf-8");
 		try {
 			context.response.setStatus(code);
 			context.response.setCharacterEncoding(encoding);
