@@ -1,6 +1,6 @@
-# rockstar
+# Rockstar
 
-A small framework for web service &amp; web application
+A small framework for web service and web application
 
 
 ```
