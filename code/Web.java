@@ -5,8 +5,8 @@ class Web {
 	void main() {
 		Rockstar.handle( "GET /",              Web::showReport);
 		Rockstar.handle( "GET /report",        Web::showReport);
-		Rockstar.handle( "GET /check",         context -> "Rockstar 0.2");
-		Rockstar.handle( "GET /service-check", Web::serveVersion);
+		Rockstar.handle( "GET /check",         context -> "Rockstar 0.3");
+		Rockstar.handle( "GET /service-check", Web::getVersion);
 		Rockstar.handle("POST /get-total",     Web::getTotal);
 	}
 	
@@ -14,9 +14,9 @@ class Web {
 		return Rockstar.render(context, "/WEB-INF/sample-view.jsp");
 	}
 	
-	static Object serveVersion(Context context) {
+	static Object getVersion(Context context) {
 		JSONObject detail = new JSONObject();
-		detail.put("version", "0.2");
+		detail.put("version", "0.3");
 		detail.put("framework", "Rockstar");
 		return detail;
 	}

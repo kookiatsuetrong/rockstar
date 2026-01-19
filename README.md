@@ -90,3 +90,17 @@ java --class-path $CPATH Bobcat --deployment-descriptor web.xml
 
 ```
 
+Compile
+```
+CPATH=runtime/bobcat25.jar
+CPATH=$CPATH:"runtime/jakarta.activation.jar"
+CPATH=$CPATH:"runtime/jakarta.mail.jar"
+CPATH=$CPATH:"runtime/json.jar"
+CPATH=$CPATH:"runtime/mysql.jar"
+CPATH=$CPATH:"runtime/rockstar.jar"
+CPATH=$CPATH:"runtime/"
+
+javac -d runtime --class-path $CPATH --source-path code code/Start.java
+
+java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 17000
+```

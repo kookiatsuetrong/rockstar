@@ -50,7 +50,7 @@ public class Rockstar extends HttpServlet {
 		String uri  = request.getRequestURI();
 		String pattern = verb + " " + uri;
 		
-		System.out.println("Pattern " + pattern);
+		System.out.println("Request Pattern: " + pattern);
 		
 		try {
 			request.setCharacterEncoding(this.encoding);
