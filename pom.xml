@@ -1,0 +1,41 @@
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>work.codestar</groupId>
+	<artifactId>rockstar</artifactId>
+	<version>live</version>
+	<build>
+		<sourceDirectory>code</sourceDirectory>
+		<testSourceDirectory>test</testSourceDirectory>
+	</build>
+	<properties>
+		<maven.compiler.release>25</maven.compiler.release>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-websocket</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+	</dependencies>
+</project>

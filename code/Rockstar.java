@@ -1,0 +1,178 @@
+import java.util.HashMap;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import org.json.JSONObject;
+
+public class Rockstar extends HttpServlet {
+	
+	static HashMap<String, Handler> 
+	map = new HashMap<>();
+	
+	public String encoding = "UTF-8";
+	
+	static void 
+	handle(String path, Handler handler) {
+		Rockstar.map.put(path, handler);
+	}
+	
+	@Override public void
+	init() {
+		// TODO: Setup character encoding here
+		
+		String cl = this.getInitParameter("class");
+		System.out.println("class = " + cl);
+		String me = this.getInitParameter("method");
+		System.out.println("method = " + me);
+		
+		if (cl == null) return;
+		if (me == null) return;
+		
+		try {
+			Class clazz     = Class.forName(cl);
+			Constructor cns = clazz.getDeclaredConstructor();
+			cns.setAccessible(true);
+			Object app = cns.newInstance();
+			Method m = clazz.getDeclaredMethod(me);
+			m.setAccessible(true);
+			m.invoke(app);
+		} catch (Exception e) { }
+	}
+	
+	@Override public void 
+	service(HttpServletRequest request,
+			HttpServletResponse response) {
+		String verb = request.getMethod();
+		String uri  = request.getRequestURI();
+		String pattern = verb + " " + uri;
+		
+		System.out.println("Pattern " + pattern);
+		
+		try {
+			request.setCharacterEncoding(this.encoding);
+		} catch (Exception e) { }
+		
+		Context context = new Context();
+		context.request = request;
+		context.response = response;
+		
+		Handler h = map.get(pattern);
+		
+		// 1. Find internal handler
+		if (valid(h)) {
+			Object o = h.handle(context);
+			if (o == null) return;
+			if (o instanceof JSONObject) this.send(context, o.toString());
+			if (o instanceof String)     this.send(context, (String)o);
+			if (o instanceof Redirect)   this.send(context, (Redirect)o);
+			return;
+		}
+		
+		var sc = getServletContext();
+
+		// 2. JSP file
+		/*
+		if (uri.endsWith(".jsp")) {
+			try {
+				System.out.println("JSP " + pattern);
+				var rd = sc.getRequestDispatcher(uri);
+				rd.forward(request, response);
+				return;
+			} catch (Exception e) { }
+		}
+		*/
+		
+		// 3. Static file
+		try {
+			var path  = sc.getRealPath(uri);
+			var file  = new File(path);
+			var found = file.exists();
+
+			// TODO: Some static files must be protected. For example:
+			//
+			//       /uploaded/contact-1234-123.*
+			//                 ^^^^^^^
+			//                 '-------------------> Allow only administrator
+			//
+			//       /uploaded/hidden-12345.png
+			//                        ^^^^^
+			//                        '------------> Allow only the owner
+			
+			if (found) {
+				System.out.println("Static file " + file);
+				var rd = sc.getNamedDispatcher("default");
+				rd.forward(request, response);
+				return;
+			}
+		} catch (Exception e) { }
+
+		// 4. Alias, such as /whatever-here
+		
+		
+		// 6. Service not found
+		if (pattern.startsWith("/service")) {
+			this.sendServiceNotFound(context);
+			return;
+		}
+		
+		// 7. Not found
+		this.send(context, 404, "Not Found");		
+	}
+	
+	public static boolean valid(Object o) {
+		return o != null;
+	}
+	
+	public void send(Context context, Redirect r) {
+		try {
+			context.response.sendRedirect(r.location);
+		} catch (Exception e) { }
+		/*
+		try {
+			context.response.setStatus(301);
+			context.response.setCharacterEncoding(encoding);
+			context.response.setHeader("Location", r.location);
+			
+			String text = "Redirect to " + r.location;			
+			PrintWriter out = context.response.getWriter();
+			out.println(text);
+		} catch (Exception e) { }
+		*/
+	}
+	
+	public void send(Context context, String text) {
+		this.send(context, 200,  text);
+	}
+	
+	public void send(Context context, int code, String text) {
+		// context.response.setHeader("Content-Type", 
+		//                  "application/json; charset=utf-8");
+		try {
+			context.response.setStatus(code);
+			context.response.setCharacterEncoding(encoding);
+			PrintWriter out = context.response.getWriter();
+			out.println(text);
+		} catch (Exception e) { }
+	}
+	
+	public void sendServiceNotFound(Context context) {
+		JSONObject reply = new JSONObject();
+		reply.put("result", "ERROR");
+		reply.put("reason", "Service not found");
+		this.send(context, 404, reply.toString());
+	}
+	
+	public static Object render(Context context, String path) {
+		try {
+			var rd = context.request.getRequestDispatcher(path);
+			rd.forward(context.request, context.response);
+		} catch (Exception e) { }
+	
+		return new View(path);
+	}
+	
+}
