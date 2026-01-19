@@ -50,7 +50,30 @@ sample
 Java deployment descriptor (web.xml)
 ```
 <web-app>
-	<url-pattern>/</url-pattern>
+	<session-config>
+		<cookie-config>
+			<name>CARD</name>
+		</cookie-config>
+		<session-timeout>1440</session-timeout>
+	</session-config>
+	
+	<servlet>
+		<servlet-name>rockstar-servlet</servlet-name>
+		<servlet-class>Rockstar</servlet-class>
+		<init-param>
+			<param-name>class</param-name>
+			<param-value>Web</param-value>
+		</init-param>
+		<init-param>
+			<param-name>method</param-name>
+			<param-value>main</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>rockstar-servlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	
 </web-app>
 ```
 
