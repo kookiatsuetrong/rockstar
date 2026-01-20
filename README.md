@@ -1,6 +1,8 @@
 # Rockstar
 
-A small framework for web service and web application
+A light framework for web service and web application.
+
+![](rockstar.png)
 
 
 ```
