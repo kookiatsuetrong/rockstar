@@ -13,11 +13,13 @@ public class Context {
 		return request.getParameter(key);
 	}
 	
-	/*
+	public JSONObject getDetail() {
+		return getJSON();
+	}
+	
 	public JSONObject getJson() {
 		return getJSON();
 	}
-	*/
 	
 	public JSONObject getJSON() {
 		String buffer = "";

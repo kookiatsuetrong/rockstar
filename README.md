@@ -118,8 +118,8 @@ class Start {
 Compile
 ```bash
 CPATH=runtime/bobcat25.jar
-CPATH=$CPATH:"runtime/jakarta.activation.jar"
-CPATH=$CPATH:"runtime/jakarta.mail.jar"
+CPATH=$CPATH:"runtime/jakarta-activation.jar"
+CPATH=$CPATH:"runtime/jakarta-mail.jar"
 CPATH=$CPATH:"runtime/json.jar"
 CPATH=$CPATH:"runtime/mysql.jar"
 CPATH=$CPATH:"runtime/rockstar.jar"
@@ -133,8 +133,8 @@ java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 17000
 Run
 ```bash
 CPATH=runtime/bobcat25.jar
-CPATH=$CPATH:"runtime/jakarta.activation.jar"
-CPATH=$CPATH:"runtime/jakarta.mail.jar"
+CPATH=$CPATH:"runtime/jakarta-activation.jar"
+CPATH=$CPATH:"runtime/jakarta-mail.jar"
 CPATH=$CPATH:"runtime/json.jar"
 CPATH=$CPATH:"runtime/mysql.jar"
 CPATH=$CPATH:"runtime/rockstar.jar"
