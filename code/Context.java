@@ -13,11 +13,13 @@ public class Context {
 		return request.getParameter(key);
 	}
 	
-	public JSONObject getJSON() {
-		return getJson();
-	}
-	
+	/*
 	public JSONObject getJson() {
+		return getJSON();
+	}
+	*/
+	
+	public JSONObject getJSON() {
 		String buffer = "";
 		try {
 			var input  = request.getInputStream();
@@ -31,7 +33,6 @@ public class Context {
 		} catch (Exception e) { }
 
 		JSONObject body = new JSONObject(buffer);
-		System.out.println(body);
 		return body;
 	}
 	

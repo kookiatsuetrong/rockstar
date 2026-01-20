@@ -25,9 +25,7 @@ public class Rockstar extends HttpServlet {
 		// TODO: Setup character encoding here
 		
 		String cl = this.getInitParameter("class");
-		System.out.println("class = " + cl);
 		String me = this.getInitParameter("method");
-		System.out.println("method = " + me);
 		
 		if (cl == null) return;
 		if (me == null) return;

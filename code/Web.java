@@ -22,7 +22,7 @@ class Web {
 	}
 	
 	static Object getTotal(Context context) {
-		JSONObject data = context.getJson();
+		JSONObject data = context.getJSON();
 		System.out.println(data);
 		data.put("output", "OK");
 		return data;
