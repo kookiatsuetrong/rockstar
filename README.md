@@ -81,16 +81,20 @@ Java deployment descriptor (web.xml)
 
 Sample code
 ```java
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-class Start {
-	
+class Web {
+
 	void main() {
-		Rockstar.handle( "GET /",              Start::showReport);
-		Rockstar.handle( "GET /report",        Start::showReport);
-		Rockstar.handle( "GET /check",         context -> "Rockstar 0.3");
-		Rockstar.handle( "GET /service-check", Start::getVersion);
-		Rockstar.handle("POST /get-total",     Start::getTotal);
+		Rockstar.handle( "GET /",                 Web::showReport);
+		Rockstar.handle( "GET /report",           Web::showReport);
+		Rockstar.handle( "GET /check",            context -> "Rockstar 0.4");
+		Rockstar.handle( "GET /service-check",    Web::getVersion);
+		Rockstar.handle("POST /get-total",        Web::getTotal);
+		Rockstar.handle( "GET /service-branches", Web::listBranches);
 	}
 	
 	static Object showReport(Context context) {
@@ -98,21 +102,32 @@ class Start {
 	}
 	
 	static Object getVersion(Context context) {
-		JSONObject detail = new JSONObject();
-		detail.put("version", "0.3");
+		Map detail = new HashMap<String, Object>();
+		detail.put("version", "0.4");
 		detail.put("framework", "Rockstar");
 		return detail;
 	}
 	
 	static Object getTotal(Context context) {
-		JSONObject data = context.getJson();
-		System.out.println(data);
-		data.put("output", "OK");
-		return data;
+		Map m = context.read();
+		m.put("result", "OK");
+		m.put("output", "3.1415926");
+		return m;
+	}
+	
+	static Object listBranches(Context context) {
+		List list = new ArrayList<String>();
+		list.add("Atlanta");
+		list.add("Boston");
+		list.add("Chicago");
+		
+		Map m = new HashMap<String, Object>();
+		m.put("name", "iCoffee");
+		m.put("branches", list);
+		return m;
 	}
 	
 }
-
 ```
 
 Compile
@@ -127,7 +142,7 @@ CPATH=$CPATH:"runtime/"
 
 javac -d runtime --class-path $CPATH --source-path code code/Start.java
 
-java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 17000
+java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 18000
 ```
 
 Run
