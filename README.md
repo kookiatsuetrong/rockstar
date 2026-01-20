@@ -79,21 +79,44 @@ Java deployment descriptor (web.xml)
 </web-app>
 ```
 
-Command Line
-```
-CPATH=runtime/bobcat25.jar
-CPATH=$CPATH:"runtime/jakarta.activation.jar"
-CPATH=$CPATH:"runtime/jakarta.mail.jar"
-CPATH=$CPATH:"runtime/json.jar"
-CPATH=$CPATH:"runtime/mysql.jar"
-CPATH=$CPATH:"runtime/rockstar.jar"
+Sample code
+```java
+import org.json.JSONObject;
 
-java --class-path $CPATH Bobcat --deployment-descriptor web.xml
+class Start {
+	
+	void main() {
+		Rockstar.handle( "GET /",              Start::showReport);
+		Rockstar.handle( "GET /report",        Start::showReport);
+		Rockstar.handle( "GET /check",         context -> "Rockstar 0.3");
+		Rockstar.handle( "GET /service-check", Start::getVersion);
+		Rockstar.handle("POST /get-total",     Start::getTotal);
+	}
+	
+	static Object showReport(Context context) {
+		return Rockstar.render(context, "/WEB-INF/sample-view.jsp");
+	}
+	
+	static Object getVersion(Context context) {
+		JSONObject detail = new JSONObject();
+		detail.put("version", "0.3");
+		detail.put("framework", "Rockstar");
+		return detail;
+	}
+	
+	static Object getTotal(Context context) {
+		JSONObject data = context.getJson();
+		System.out.println(data);
+		data.put("output", "OK");
+		return data;
+	}
+	
+}
 
 ```
 
 Compile
-```
+```bash
 CPATH=runtime/bobcat25.jar
 CPATH=$CPATH:"runtime/jakarta.activation.jar"
 CPATH=$CPATH:"runtime/jakarta.mail.jar"
@@ -105,4 +128,17 @@ CPATH=$CPATH:"runtime/"
 javac -d runtime --class-path $CPATH --source-path code code/Start.java
 
 java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 17000
+```
+
+Run
+```bash
+CPATH=runtime/bobcat25.jar
+CPATH=$CPATH:"runtime/jakarta.activation.jar"
+CPATH=$CPATH:"runtime/jakarta.mail.jar"
+CPATH=$CPATH:"runtime/json.jar"
+CPATH=$CPATH:"runtime/mysql.jar"
+CPATH=$CPATH:"runtime/rockstar.jar"
+
+java --class-path $CPATH Bobcat --deployment-descriptor web.xml
+
 ```
