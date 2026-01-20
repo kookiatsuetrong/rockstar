@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import org.json.JSONObject;
 
 public class Context {
@@ -68,8 +69,7 @@ public class Context {
 		this.bodyBuffer = buffer;
 	}
 	
-	public HashMap<String, Object> read() {
-		System.out.println("testing " + testing);
+	public Map read() {
 		if (testing == false) {
 			bodyBuffer = "";
 			try {
@@ -87,14 +87,7 @@ public class Context {
 		System.out.println("bodyBuffer " + bodyBuffer);
 		
 		JSONObject body = new JSONObject(bodyBuffer);
-		Iterator<String> keys = body.keys();
-		
-		HashMap<String, Object> result = new HashMap<>();
-		while (keys.hasNext()) {
-			String item = keys.next();
-			Object value = body.get(item);
-			result.put(item, value);
-		}
+		Map result = Rockstar.toMap(body);
 		return result;
 	}
 	
