@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import org.json.JSONObject;
 
 public class Context {
@@ -85,7 +85,6 @@ public class Context {
 		}
 		
 		System.out.println("bodyBuffer " + bodyBuffer);
-		
 		JSONObject body = new JSONObject(bodyBuffer);
 		Map result = Rockstar.toMap(body);
 		return result;
@@ -100,7 +99,7 @@ public class Context {
 	public String getParameter(String key) {
 		return request.getParameter(key);
 	}
-	
+	/*
 	public JSONObject getDetail() {
 		return getJSON();
 	}
@@ -116,5 +115,5 @@ public class Context {
 		JSONObject body = new JSONObject(bodyBuffer);
 		return body;
 	}
-
+	*/
 }

@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 class Web {
 
@@ -19,7 +19,7 @@ class Web {
 	}
 	
 	static Object getVersion(Context context) {
-		Map detail = new HashMap<String, Object>();
+		var detail = new HashMap<String,Object>();
 		detail.put("version", "0.4");
 		detail.put("framework", "Rockstar");
 		return detail;
@@ -27,18 +27,19 @@ class Web {
 	
 	static Object getTotal(Context context) {
 		Map m = context.read();
-		m.put("result", "OK");
-		m.put("output", "3.1415926");
-		return m;
+		var result = new HashMap<String, Object>();
+		result.put("result", "OK");
+		result.put("output", "3.1415926");
+		return result;
 	}
 	
 	static Object listBranches(Context context) {
-		List list = new ArrayList<String>();
+		var list = new ArrayList<String>();
 		list.add("Atlanta");
 		list.add("Boston");
 		list.add("Chicago");
 		
-		Map m = new HashMap<String, Object>();
+		var m = new HashMap<String, Object>();
 		m.put("name", "iCoffee");
 		m.put("branches", list);
 		return m;
