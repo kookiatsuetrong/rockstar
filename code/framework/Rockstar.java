@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +49,11 @@ public class Rockstar extends HttpServlet {
 		if (me == null) return;
 		
 		try {
-			Class<?> clazz     = Class.forName(cl);
-			Constructor<?> cns = clazz.getDeclaredConstructor();
+			Class<?> clz = Class.forName(cl);
+			Constructor<?> cns = clz.getDeclaredConstructor();
 			cns.setAccessible(true);
 			Object app = cns.newInstance();
-			Method m = clazz.getDeclaredMethod(me);
+			Method m = clz.getDeclaredMethod(me);
 			m.setAccessible(true);
 			m.invoke(app);
 		} catch (Exception e) {
@@ -85,10 +86,12 @@ public class Rockstar extends HttpServlet {
 			if (o instanceof Redirect) this.send(context, (Redirect)o);
 			
 			if (o instanceof Map) {
-				JSONObject result = fromMap((Map)o);
-				context.response.setHeader("Content-Type", 
-								"application/json; charset=utf-8");
-				this.send(context, result.toString());
+				try {
+					JSONObject result = fromMap((Map)o);
+					context.response.setHeader("Content-Type", 
+									"application/json; charset=utf-8");
+					this.send(context, result.toString());
+				} catch (Exception e) {}
 			}
 			
 			if (o instanceof JSONObject) {
@@ -223,7 +226,7 @@ public class Rockstar extends HttpServlet {
 	}
 
 	public static Map toMap(JSONObject input) {
-		Map result = new TreeMap<String, Object>();
+		TreeMap<String, Object> result = new TreeMap<String, Object>();
 		if (input == null) return result;
 		
 		Iterator<String> keys = input.keys();
@@ -248,7 +251,7 @@ public class Rockstar extends HttpServlet {
 	}
 	
 	public static List toList(JSONArray array) {
-		List list = new ArrayList<Object>();
+		ArrayList<Object> list = new ArrayList<>();
 		if (array == null) return list;
 		
 		for (int i = 0; i < array.length(); i++) {
@@ -273,7 +276,7 @@ public class Rockstar extends HttpServlet {
 		JSONObject result = new JSONObject();
 		if (map == null) return result;
 		
-		Set<String> keys = map.keySet();
+		Set<String> keys = (Set<String>)map.keySet();
 		for (String k : keys) {
 			Object value = map.get(k);
 			if (value instanceof Map) {
