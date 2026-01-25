@@ -1,3 +1,5 @@
+package framework;
+
 public class Redirect {
 	
 	public Redirect(String s) {

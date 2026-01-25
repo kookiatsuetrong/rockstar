@@ -1,3 +1,5 @@
+package framework;
+
 public class View {
 	
 	public View(String s) {

@@ -1,3 +1,5 @@
+package framework;
+
 import java.util.HashMap;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +24,17 @@ public class Rockstar extends HttpServlet {
 	
 	public String encoding = "UTF-8";
 	
-	static void 
+	public static void 
 	handle(String path, Handler handler) {
 		Rockstar.map.put(path, handler);
+	}
+	
+	static ArrayList<Handler>
+	list = new ArrayList<>();
+	
+	public static void
+	addFallback(Handler handler) {
+		list.add(handler);
 	}
 	
 	@Override public void
@@ -38,14 +48,16 @@ public class Rockstar extends HttpServlet {
 		if (me == null) return;
 		
 		try {
-			Class clazz     = Class.forName(cl);
-			Constructor cns = clazz.getDeclaredConstructor();
+			Class<?> clazz     = Class.forName(cl);
+			Constructor<?> cns = clazz.getDeclaredConstructor();
 			cns.setAccessible(true);
 			Object app = cns.newInstance();
 			Method m = clazz.getDeclaredMethod(me);
 			m.setAccessible(true);
 			m.invoke(app);
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	
 	@Override public void 
@@ -127,16 +139,41 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 
 		// 4. Alias, such as /whatever-here
+		for (Handler f : list) {
+			Object o = f.handle(context);
+			if (o == null) continue;
+			
+			if (o instanceof String)   this.send(context, (String)o);
+			if (o instanceof Redirect) this.send(context, (Redirect)o);
+			
+			if (o instanceof Map) {
+				JSONObject result = fromMap((Map)o);
+				context.response.setHeader("Content-Type", 
+								"application/json; charset=utf-8");
+				this.send(context, result.toString());
+			}
+			
+			if (o instanceof JSONObject) {
+				context.response.setHeader("Content-Type", 
+								"application/json; charset=utf-8");
+				this.send(context, o.toString());
+			}
+			
+			return;
+		}
 		
-		
-		// 6. Service not found
+		// 5. Service not found
 		if (pattern.startsWith("/service")) {
 			this.sendServiceNotFound(context);
 			return;
 		}
 		
-		// 7. Not found
+		// 6. Not found
 		this.send(context, 404, "Not Found");		
+	}
+	
+	public void redirect(Context context, String path) {
+		this.send(context, new Redirect(path));
 	}
 	
 	public void send(Context context, Redirect r) {

@@ -1,3 +1,5 @@
+package framework;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -96,6 +98,12 @@ public class Context {
 	}
 	
 	// Deprecated?
+		
+	public boolean isLoggedIn() {
+		HttpSession session = this.request.getSession();
+		String email = (String)session.getAttribute("email");
+		return email != null;
+	}
 	
 	public String getParameter(String key) {
 		return request.getParameter(key);
