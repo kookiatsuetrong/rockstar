@@ -1,17 +1,15 @@
-package framework;
+package web.framework;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
-/*
 class Web {
 
 	void main() {
 		Rockstar.handle( "GET /",                 Web::showReport);
 		Rockstar.handle( "GET /report",           Web::showReport);
-		Rockstar.handle( "GET /check",            context -> "Rockstar 0.4");
+		Rockstar.handle( "GET /check",            context -> "Rockstar 0.5");
 		Rockstar.handle( "GET /service-check",    Web::getVersion);
 		Rockstar.handle("POST /get-total",        Web::getTotal);
 		Rockstar.handle( "GET /service-branches", Web::listBranches);
@@ -23,7 +21,7 @@ class Web {
 	
 	static Object getVersion(Context context) {
 		var detail = new HashMap<String,Object>();
-		detail.put("version", "0.4");
+		detail.put("version", "0.5");
 		detail.put("framework", "Rockstar");
 		return detail;
 	}
@@ -49,4 +47,3 @@ class Web {
 	}
 	
 }
-*/

@@ -1,4 +1,4 @@
-package framework;
+package web.framework;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import org.json.JSONObject;
 
 public class Context {
@@ -97,16 +96,18 @@ public class Context {
 	}
 	
 	// Deprecated?
-		
+	
+	public String getParameter(String key) {
+		return request.getParameter(key);
+	}
+	
+	/*
 	public boolean isLoggedIn() {
 		HttpSession session = this.request.getSession();
 		String email = (String)session.getAttribute("email");
 		return email != null;
 	}
-	
-	public String getParameter(String key) {
-		return request.getParameter(key);
-	}
+	*/
 	
 	/*
 	public JSONObject getDetail() {

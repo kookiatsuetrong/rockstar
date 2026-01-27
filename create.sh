@@ -31,7 +31,7 @@ cat <<EOF > web.xml
 	
 	<servlet>
 		<servlet-name>rockstar-servlet</servlet-name>
-		<servlet-class>Rockstar</servlet-class>
+		<servlet-class>web.framework.Rockstar</servlet-class>
 		<init-param>
 			<param-name>class</param-name>
 			<param-value>Start</param-value>
@@ -51,6 +51,15 @@ EOF
 
 
 cat <<EOF > code/Start.java
+import web.framework.Rockstar;
+import web.framework.Redirect;
+import web.framework.Handler;
+import web.framework.Context;
+import web.framework.View;
+import java.util.ArrayList;
+import java.util.TreeMap;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 
 class Start {
@@ -58,9 +67,9 @@ class Start {
 	void main() {
 		Rockstar.handle( "GET /",              Start::showReport);
 		Rockstar.handle( "GET /report",        Start::showReport);
-		Rockstar.handle( "GET /check",         context -> "Rockstar 0.3");
+		Rockstar.handle( "GET /check",         context -> "Rockstar 0.5");
 		Rockstar.handle( "GET /service-check", Start::getVersion);
-		Rockstar.handle("POST /get-total",     Start::getTotal);
+		Rockstar.handle("POST /list-branch",   Start::listBranches);
 	}
 	
 	static Object showReport(Context context) {
@@ -69,16 +78,21 @@ class Start {
 	
 	static Object getVersion(Context context) {
 		JSONObject detail = new JSONObject();
-		detail.put("version", "0.3");
+		detail.put("version", "0.5");
 		detail.put("framework", "Rockstar");
 		return detail;
 	}
 	
-	static Object getTotal(Context context) {
-		JSONObject data = context.getJson();
-		System.out.println(data);
-		data.put("output", "OK");
-		return data;
+	static Object listBranches(Context context) {
+		var list = new ArrayList<String>();
+		list.add("Atlanta");
+		list.add("Boston");
+		list.add("Chicago");
+		
+		var m = new TreeMap<String, Object>();
+		m.put("name", "iCoffee");
+		m.put("branches", list);
+		return m;
 	}
 	
 }

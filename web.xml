@@ -8,10 +8,10 @@
 	
 	<servlet>
 		<servlet-name>rockstar-servlet</servlet-name>
-		<servlet-class>Rockstar</servlet-class>
+		<servlet-class>web.framework.Rockstar</servlet-class>
 		<init-param>
 			<param-name>class</param-name>
-			<param-value>Web</param-value>
+			<param-value>web.framework.Web</param-value>
 		</init-param>
 		<init-param>
 			<param-name>method</param-name>

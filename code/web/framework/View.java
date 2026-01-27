@@ -1,4 +1,4 @@
-package framework;
+package web.framework;
 
 public class View {
 	
