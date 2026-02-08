@@ -19,8 +19,7 @@ import org.json.JSONObject;
 
 public class Rockstar extends HttpServlet {
 	
-	static HashMap<String, Handler> 
-	map = new HashMap<>();
+	static HashMap<String, Handler> map = new HashMap<>();
 	
 	public String encoding = "UTF-8";
 	
@@ -29,18 +28,22 @@ public class Rockstar extends HttpServlet {
 		Rockstar.map.put(path, handler);
 	}
 	
-	static ArrayList<Handler>
-	list = new ArrayList<>();
+	static ArrayList<Handler> list = new ArrayList<>();
 	
 	public static void
 	addFallback(Handler handler) {
 		list.add(handler);
 	}
 	
+	
+	public static boolean
+	valid(Object o) {
+		return o != null;
+	}
+	
 	@Override public void
 	init() {
 		// TODO: Setup character encoding here
-		
 		String cl = this.getInitParameter("class");
 		String me = this.getInitParameter("method");
 		
@@ -55,6 +58,7 @@ public class Rockstar extends HttpServlet {
 			Method m = clz.getDeclaredMethod(me);
 			m.setAccessible(true);
 			m.invoke(app);
+			System.out.println("Rockstar framework is ready.");
 		} catch (Exception e) {
 			System.err.println(e);
 		}
@@ -74,31 +78,13 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 		
 		Context context = new Context(request, response);
-		Handler h = map.get(pattern);
+		Handler handler = map.get(pattern);
 		
 		// 1. Find internal handler
-		if (valid(h)) {
-			Object o = h.handle(context);
-			if (o == null) return;
-			
-			if (o instanceof String)   this.send(context, (String)o);
-			if (o instanceof Redirect) this.send(context, (Redirect)o);
-			
-			if (o instanceof Map) {
-				try {
-					JSONObject result = fromMap((Map)o);
-					context.response.setHeader("Content-Type", 
-									"application/json; charset=utf-8");
-					this.send(context, result.toString());
-				} catch (Exception e) {}
-			}
-			
-			if (o instanceof JSONObject) {
-				context.response.setHeader("Content-Type", 
-								"application/json; charset=utf-8");
-				this.send(context, o.toString());
-			}
-			
+		if (valid(handler)) {
+			Object result = handler.handle(context);
+			if (result == null) return;
+			sendHandler(context, result);
 			return;
 		}
 		
@@ -141,26 +127,10 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 
 		// 4. Alias, such as /whatever-here
-		for (Handler f : list) {
-			Object o = f.handle(context);
-			if (o == null) continue;
-			
-			if (o instanceof String)   this.send(context, (String)o);
-			if (o instanceof Redirect) this.send(context, (Redirect)o);
-			
-			if (o instanceof Map) {
-				JSONObject result = fromMap((Map)o);
-				context.response.setHeader("Content-Type", 
-								"application/json; charset=utf-8");
-				this.send(context, result.toString());
-			}
-			
-			if (o instanceof JSONObject) {
-				context.response.setHeader("Content-Type", 
-								"application/json; charset=utf-8");
-				this.send(context, o.toString());
-			}
-			
+		for (Handler target : list) {
+			Object result = target.handle(context);
+			if (result == null) continue;
+			sendHandler(context, result);
 			return;
 		}
 		
@@ -182,17 +152,6 @@ public class Rockstar extends HttpServlet {
 		try {
 			context.response.sendRedirect(r.location);
 		} catch (Exception e) { }
-		/*
-		try {
-			context.response.setStatus(301);
-			context.response.setCharacterEncoding(encoding);
-			context.response.setHeader("Location", r.location);
-			
-			String text = "Redirect to " + r.location;			
-			PrintWriter out = context.response.getWriter();
-			out.println(text);
-		} catch (Exception e) { }
-		*/
 	}
 	
 	public void send(Context context, String text) {
@@ -206,6 +165,37 @@ public class Rockstar extends HttpServlet {
 			PrintWriter out = context.response.getWriter();
 			out.println(text);
 		} catch (Exception e) { }
+	}
+	
+	public void sendHandler(Context context, Object result) {
+		if (result instanceof String)   this.send(context, (String)result);
+		if (result instanceof Redirect) this.send(context, (Redirect)result);
+
+		if (result instanceof Map) {
+			JSONObject response = fromMap((Map)result);
+			context.response.setHeader("Content-Type", 
+							"application/json; charset=utf-8");
+			this.send(context, response.toString());
+		}
+		
+		if (result instanceof List) {
+			JSONArray response = fromList((List)result);
+			context.response.setHeader("Content-Type", 
+							"application/json; charset=utf-8");
+			this.send(context, response.toString());
+		}
+		
+		if (result instanceof JSONArray) {
+			context.response.setHeader("Content-Type", 
+							"application/json; charset=utf-8");
+			this.send(context, result.toString());
+		}
+
+		if (result instanceof JSONObject) {
+			context.response.setHeader("Content-Type", 
+							"application/json; charset=utf-8");
+			this.send(context, result.toString());
+		}
 	}
 	
 	public void sendServiceNotFound(Context context) {
@@ -311,10 +301,6 @@ public class Rockstar extends HttpServlet {
 			array.put(value);
 		}
 		return array;
-	}
-	
-	public static boolean valid(Object o) {
-		return o != null;
 	}
 	
 }
