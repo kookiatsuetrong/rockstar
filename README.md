@@ -81,36 +81,49 @@ Java deployment descriptor (web.xml)
 
 Sample code
 ```java
-import web.framework.Rockstar;
-import web.framework.Redirect;
-import web.framework.Handler;
-import web.framework.Context;
-import web.framework.View;
-import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.Map;
-import org.json.JSONObject;
+package web.framework;
 
-class Start {
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.ArrayList;
+
+class Web {
 
 	void main() {
-		Rockstar.handle( "GET /",              Start::showReport);
-		Rockstar.handle( "GET /report",        Start::showReport);
-		Rockstar.handle( "GET /check",         context -> "Rockstar 0.5");
-		Rockstar.handle( "GET /service-check", Start::getVersion);
-		Rockstar.handle("POST /list-branch",   Start::listBranches);
+		Rockstar.handle( "GET /",                 Web::showHome);
+		Rockstar.handle( "GET /home",             Web::showHome);
+		Rockstar.handle( "GET /report",           Web::showReport);
+		Rockstar.handle( "GET /check",            context -> "Rockstar 0.5");
+		Rockstar.handle( "GET /service-check",    Web::getVersion);
+		Rockstar.handle("POST /get-total",        Web::getTotal);
+		Rockstar.handle( "GET /service-branches", Web::listBranches);
+	}
+	
+	static Object showHome(Context context) {
+		return new View("/WEB-INF/sample-view.jsp");
 	}
 	
 	static Object showReport(Context context) {
-		return Rockstar.render(context, "/WEB-INF/sample-view.jsp");
+		Map<String, Object> model = new TreeMap<>();
+		model.put("brand", "iCoffee");
+		model.put("products", new String[] { "Latte", "Mocha", "Espresso" } );
+		String buffer = Freemarker.render("/web/WEB-INF/report.html", model);
+		return buffer;
 	}
 	
 	static Object getVersion(Context context) {
-		JSONObject detail = new JSONObject();
+		var detail = new TreeMap<String,Object>();
 		detail.put("version", "0.5");
 		detail.put("framework", "Rockstar");
 		return detail;
+	}
+	
+	static Object getTotal(Context context) {
+		Map m = context.read();
+		var result = new TreeMap<String, Object>();
+		result.put("result", "OK");
+		result.put("output", "3.1415926");
+		return result;
 	}
 	
 	static Object listBranches(Context context) {
@@ -129,31 +142,47 @@ class Start {
 
 ```
 
-Compile
+Compile and run on Unix, macOS, Linux, ...
 ```bash
 CPATH=runtime/bobcat25.jar
 CPATH=$CPATH:"runtime/jakarta-activation.jar"
 CPATH=$CPATH:"runtime/jakarta-mail.jar"
 CPATH=$CPATH:"runtime/json.jar"
 CPATH=$CPATH:"runtime/mysql.jar"
-CPATH=$CPATH:"runtime/rockstar.jar"
+CPATH=$CPATH:"runtime/freemarker.jar"
 CPATH=$CPATH:"runtime/"
 
-javac -d runtime --class-path $CPATH --source-path code code/Start.java
+javac -d runtime --class-path $CPATH \
+--source-path code code/web/framework/*.java
 
-java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 18000
+java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 1800
 ```
 
-Run
-```bash
-CPATH=runtime/bobcat25.jar
-CPATH=$CPATH:"runtime/jakarta-activation.jar"
-CPATH=$CPATH:"runtime/jakarta-mail.jar"
-CPATH=$CPATH:"runtime/json.jar"
-CPATH=$CPATH:"runtime/mysql.jar"
-CPATH=$CPATH:"runtime/rockstar.jar"
-CPATH=$CPATH:"runtime/"
-
-java --class-path $CPATH Bobcat --deployment-descriptor web.xml
+Compile and run on Windows
 
 ```
+set RUNTIME=runtime\bobcat25.jar
+set RUNTIME=%RUNTIME%;runtime\jakarta-activation.jar
+set RUNTIME=%RUNTIME%;runtime\jakarta-mail.jar
+set RUNTIME=%RUNTIME%;runtime\json.jar
+set RUNTIME=%RUNTIME%;runtime\mysql.jar
+set RUNTIME=%RUNTIME%;runtime\freemarker.jar
+set RUNTIME=%RUNTIME%;runtime\
+
+javac -d runtime --class-path %RUNTIME% --source-path code code\web\framework\*.java
+
+java --class-path %RUNTIME% Bobcat --deployment-descriptor web.xml --port 1800
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

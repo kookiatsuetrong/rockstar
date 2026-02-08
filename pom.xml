@@ -22,16 +22,20 @@
 			<version>RELEASE</version>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>RELEASE</version>
-		</dependency>
-		<dependency>
 			<groupId>jakarta.mail</groupId>
 			<artifactId>jakarta.mail-api</artifactId>
 			<version>RELEASE</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>RELEASE</version>
+		</dependency>		
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

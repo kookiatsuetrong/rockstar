@@ -1,19 +1,23 @@
 package web.framework;
 
+import java.io.File;
+import java.io.PrintWriter;
+
+import java.util.Set;
+import java.util.Map;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ArrayList;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
+
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -34,7 +38,6 @@ public class Rockstar extends HttpServlet {
 	addFallback(Handler handler) {
 		list.add(handler);
 	}
-	
 	
 	public static boolean
 	valid(Object o) {
@@ -83,8 +86,7 @@ public class Rockstar extends HttpServlet {
 		// 1. Find internal handler
 		if (valid(handler)) {
 			Object result = handler.handle(context);
-			if (result == null) return;
-			sendHandler(context, result);
+			processHandler(context, result);
 			return;
 		}
 		
@@ -126,85 +128,97 @@ public class Rockstar extends HttpServlet {
 			}
 		} catch (Exception e) { }
 
-		// 4. Alias, such as /whatever-here
+		// 4. Alias for fallback, such as /whatever-here
 		for (Handler target : list) {
 			Object result = target.handle(context);
-			if (result == null) continue;
-			sendHandler(context, result);
-			return;
+			if (result == null) continue; // process next fallback
+			processHandler(context, result);
+			return; // don't process next alias
 		}
 		
 		// 5. Service not found
 		if (pattern.startsWith("/service")) {
-			this.sendServiceNotFound(context);
+			JSONObject reply = new JSONObject();
+			reply.put("result", "ERROR");
+			reply.put("reason", "Service not found");
+			String text = reply.toString();
+			send(context, 404, "application/json", text);
 			return;
 		}
 		
 		// 6. Not found
-		this.send(context, 404, "Not Found");		
+		this.send(context, 404, "text/html", "Not Found");		
 	}
 	
-	public void redirect(Context context, String path) {
-		this.send(context, new Redirect(path));
-	}
-	
-	public void send(Context context, Redirect r) {
-		try {
-			context.response.sendRedirect(r.location);
-		} catch (Exception e) { }
-	}
-	
-	public void send(Context context, String text) {
-		this.send(context, 200,  text);
-	}
-	
-	public void send(Context context, int code, String text) {
+	void send(Context context, int code, String type, String text) {
 		try {
 			context.response.setStatus(code);
+			context.response.setHeader("Content-Type", type + ";charset=utf-8");
 			context.response.setCharacterEncoding(encoding);
 			PrintWriter out = context.response.getWriter();
 			out.println(text);
 		} catch (Exception e) { }
 	}
 	
-	public void sendHandler(Context context, Object result) {
-		if (result instanceof String)   this.send(context, (String)result);
-		if (result instanceof Redirect) this.send(context, (Redirect)result);
-
-		if (result instanceof Map) {
-			JSONObject response = fromMap((Map)result);
-			context.response.setHeader("Content-Type", 
-							"application/json; charset=utf-8");
-			this.send(context, response.toString());
-		}
-		
-		if (result instanceof List) {
-			JSONArray response = fromList((List)result);
-			context.response.setHeader("Content-Type", 
-							"application/json; charset=utf-8");
-			this.send(context, response.toString());
-		}
-		
-		if (result instanceof JSONArray) {
-			context.response.setHeader("Content-Type", 
-							"application/json; charset=utf-8");
-			this.send(context, result.toString());
-		}
-
-		if (result instanceof JSONObject) {
-			context.response.setHeader("Content-Type", 
-							"application/json; charset=utf-8");
-			this.send(context, result.toString());
-		}
+	void send(Context context, String text) {
+		this.send(context, 200, "text/html", text);
 	}
 	
-	public void sendServiceNotFound(Context context) {
-		JSONObject reply = new JSONObject();
-		reply.put("result", "ERROR");
-		reply.put("reason", "Service not found");
-		this.send(context, 404, reply.toString());
+	void send(Context context, Redirect r) {
+		try {
+			context.response.sendRedirect(r.location);
+		} catch (Exception e) { }
 	}
 	
+	void send(Context context, Map map) {
+		String text = fromMap(map).toString();
+		this.send(context, 200, "application/json", text);
+	}
+	
+	void send(Context context, List list) {
+		String text = fromList(list).toString();
+		this.send(context, 200, "application/json", text);
+	}
+	
+	void send(Context context, JSONObject data) {
+		if (data == null) data = new JSONObject();
+		this.send(context, 200, "application/json", data.toString());
+	}
+	
+	void send(Context context, JSONArray data) {
+		if (data == null) data = new JSONArray();
+		this.send(context, 200, "application/json", data.toString());
+	}
+	
+	void processHandler(Context context, Object result) {
+		if (result == null) return;
+		if (result instanceof String     s) this.send(context, s);
+		if (result instanceof Redirect   r) this.send(context, r);
+		if (result instanceof Map        m) this.send(context, m);
+		if (result instanceof List       l) this.send(context, l);
+		if (result instanceof JSONObject o) this.send(context, o);		
+		if (result instanceof JSONArray  a) this.send(context, a);
+		
+		if (result instanceof View       v) this.render(context, v);
+		
+		// TODO: Add fallback
+	}
+	
+	void render(Context context, View view) {
+		try {
+			var rd = context.request.getRequestDispatcher(view.location);
+			rd.forward(context.request, context.response);
+		} catch (Exception e) { }
+	}
+	
+	
+	/* Obsoleted
+	void redirect(Context context, String path) {
+		this.send(context, new Redirect(path));
+	}
+	*/
+	
+	/* Obsoleted
 	public static Object render(Context context, String path) {
 		try {
 			var rd = context.request.getRequestDispatcher(path);
@@ -213,6 +227,7 @@ public class Rockstar extends HttpServlet {
 	
 		return new View(path);
 	}
+	*/
 
 	public static Map toMap(JSONObject input) {
 		TreeMap<String, Object> result = new TreeMap<String, Object>();
