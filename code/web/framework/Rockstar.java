@@ -280,16 +280,23 @@ public class Rockstar extends HttpServlet {
 		JSONObject result = new JSONObject();
 		if (map == null) return result;
 		
-		Set<String> keys = (Set<String>)map.keySet();
+		Map<String,Object> m = new TreeMap<>();
+		for (Object k : map.keySet()) {
+			String s = (String)k;
+			Object e = map.get(k);
+			m.put(s, e);
+		}
+	
+		Set<String> keys = m.keySet();
 		for (String k : keys) {
-			Object value = map.get(k);
-			if (value instanceof Map) {
-				JSONObject inner = fromMap((Map)value);
+			Object value = m.get(k);
+			if (value instanceof Map p) {
+				JSONObject inner = fromMap(p);
 				result.put(k, inner);
 				continue;
 			}
-			if (value instanceof List) {
-				JSONArray inner = fromList((List)value);
+			if (value instanceof List l) {
+				JSONArray inner = fromList(l);
 				result.put(k, inner);
 				continue;
 			}
@@ -299,17 +306,17 @@ public class Rockstar extends HttpServlet {
 	}
 	
 	public static JSONArray fromList(List list) {
-		JSONArray array = new JSONArray();
+	 	JSONArray array = new JSONArray();
 		if (list == null) return array;
 		
 		for (Object value : list) {
-			if (value instanceof Map) {
-				JSONObject inner = fromMap((Map)value);
+			if (value instanceof Map m) {
+				JSONObject inner = fromMap(m);
 				array.put(inner);
 				continue;
 			}
-			if (value instanceof List) {
-				JSONArray inner = fromList((List)value);
+			if (value instanceof List item) {
+				JSONArray inner = fromList(item);
 				array.put(inner);
 				continue;
 			}
