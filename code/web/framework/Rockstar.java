@@ -86,6 +86,7 @@ public class Rockstar extends HttpServlet {
 		// 1. Find internal handler
 		if (valid(handler)) {
 			Object result = handler.handle(context);
+			System.out.println(result);
 			processHandler(context, result);
 			return;
 		}
@@ -153,7 +154,8 @@ public class Rockstar extends HttpServlet {
 	void send(Context context, int code, String type, String text) {
 		try {
 			context.response.setStatus(code);
-			context.response.setHeader("Content-Type", type + ";charset=utf-8");
+			context.response.setHeader("Content-Type",
+									type + ";charset=utf-8");
 			context.response.setCharacterEncoding(encoding);
 			PrintWriter out = context.response.getWriter();
 			out.println(text);
@@ -206,9 +208,13 @@ public class Rockstar extends HttpServlet {
 	
 	void render(Context context, View view) {
 		try {
-			var rd = context.request.getRequestDispatcher(view.location);
+			var rd = context.request.getRequestDispatcher(view.location);			
+			// var sc = context.request.getServletContext();
+			// var rd = sc.getNamedDispatcher("default");
 			rd.forward(context.request, context.response);
-		} catch (Exception e) { }
+		} catch (Exception e) { 
+			System.out.println(e);
+		}
 	}
 	
 	

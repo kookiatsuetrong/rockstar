@@ -174,15 +174,3 @@ javac -d runtime --class-path %RUNTIME% --source-path code code\web\framework\*.
 java --class-path %RUNTIME% Bobcat --deployment-descriptor web.xml --port 1800
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
