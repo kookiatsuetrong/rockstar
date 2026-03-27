@@ -9,28 +9,47 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 
+/**
+ * There are two kind of context
+ * 1. real HTTP context
+ * 2. test context
+ * 
+ * For real context, HTTP GET request
+ *                   access data from query("variable")
+ * For real context, HTTP POST request
+ *                   access data from read() as a JSON
+ * 
+ * For real context, HTTP session variable
+ *                   context.getSession(string)
+ * 
+ * For test context, HTTP GET request
+ *                   can be simulate by addQuery(key, value)
+ * For test context, HTTP POST request
+ *                   can be simulate by setBodyBuffer(json-string)
+ * For test context, HTTP Session variable
+ *                   context.setSession(key, value)
+ * 
+ * 
+ */
+
 public class Context {
+	
 	public HttpServletRequest request;
 	public HttpServletResponse response;
 	
 	public boolean testing;
 	
 	public Context() {
-		this.testing = true;
-		this(null, null);
+		this.testing    = true;
+		this.queryMap   = new HashMap<>();
+		this.sessionMap = new HashMap<>();
 	}
 	
 	public Context(HttpServletRequest request,
 					HttpServletResponse response) {
-		this.request = request;
+		this.request  = request;
 		this.response = response;
-		
-		if (this.testing == true) {
-			this.queryMap = new HashMap<String, String>();
-		}
-		if (this.testing == false) {
-			this.method = this.request.getMethod();
-		}
+		this.method   = this.request.getMethod();
 	}
 	
 	// For Unit testing to mockup HTTP request
@@ -48,12 +67,13 @@ public class Context {
 	// read()   --> HTTP POST
 	
 	protected HashMap<String, String> queryMap;
+	HashMap<String, Object> sessionMap;
 	
+	// for testing
 	public void addQuery(String key, String value) {
-		if (this.queryMap == null) {
-			this.queryMap = new HashMap<String, String>();
+		if (this.testing == true) {
+			this.queryMap.put(key, value);
 		}
-		queryMap.put(key, value);
 	}
 	
 	public String query(String key) {
@@ -61,7 +81,7 @@ public class Context {
 			return this.queryMap.get(key);
 		}
 		
-		return request.getParameter(key);		
+		return request.getParameter(key);
 	}
 	
 	protected String bodyBuffer = "{}";
@@ -70,7 +90,7 @@ public class Context {
 		this.bodyBuffer = buffer;
 	}
 	
-	public Map read() {
+	public Map<String, Object> read() {
 		if (testing == false) {
 			bodyBuffer = "";
 			try {
@@ -87,7 +107,7 @@ public class Context {
 		
 		System.out.println("bodyBuffer " + bodyBuffer);
 		JSONObject body = new JSONObject(bodyBuffer);
-		Map result = Rockstar.toMap(body);
+		Map<String, Object> result = Rockstar.toMap(body);
 		return result;
 	}
 	
@@ -95,6 +115,32 @@ public class Context {
 		return request.getSession(created);
 	}
 	
+	public Object getSession(String name) {
+		if (this.testing) {
+			return sessionMap.get(name);
+		}
+		HttpSession session = request.getSession(true);
+		return session.getAttribute(name);
+	}
+	
+	public void setSession(String name, Object value) {
+		if (this.testing) {
+			this.sessionMap.put(name, value);
+			return;
+		}
+		HttpSession session = request.getSession(true);
+		session.setAttribute(name, value);
+	}
+	
+	public void removeSession(String name) {
+		if (this.testing) {
+			this.sessionMap.remove(name);
+			return;
+		}
+		HttpSession session = request.getSession(true);
+		session.removeAttribute(name);
+	}
+		
 	// Deprecated?
 	
 	public String getParameter(String key) {

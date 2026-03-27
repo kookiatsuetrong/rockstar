@@ -75,6 +75,7 @@ public class Rockstar extends HttpServlet {
 		String pattern = verb + " " + uri;
 		
 		System.out.println("Request Pattern: " + pattern);
+		request.setAttribute("path", uri);
 		
 		try {
 			request.setCharacterEncoding(this.encoding);
@@ -86,7 +87,6 @@ public class Rockstar extends HttpServlet {
 		// 1. Find internal handler
 		if (valid(handler)) {
 			Object result = handler.handle(context);
-			System.out.println(result);
 			processHandler(context, result);
 			return;
 		}
@@ -172,12 +172,12 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 	}
 	
-	void send(Context context, Map map) {
+	void send(Context context, TreeMap<?,?> map) {
 		String text = fromMap(map).toString();
 		this.send(context, 200, "application/json", text);
 	}
 	
-	void send(Context context, List list) {
+	void send(Context context, ArrayList<?> list) {
 		String text = fromList(list).toString();
 		this.send(context, 200, "application/json", text);
 	}
@@ -194,14 +194,14 @@ public class Rockstar extends HttpServlet {
 	
 	void processHandler(Context context, Object result) {
 		if (result == null) return;
-		if (result instanceof String     s) this.send(context, s);
-		if (result instanceof Redirect   r) this.send(context, r);
-		if (result instanceof Map        m) this.send(context, m);
-		if (result instanceof List       l) this.send(context, l);
-		if (result instanceof JSONObject o) this.send(context, o);		
-		if (result instanceof JSONArray  a) this.send(context, a);
+		if (result instanceof String       s) this.send(context, s);
+		if (result instanceof Redirect     r) this.send(context, r);
+		if (result instanceof TreeMap<?,?> m) this.send(context, m);
+		if (result instanceof ArrayList<?> l) this.send(context, l);
+		if (result instanceof JSONObject   o) this.send(context, o);		
+		if (result instanceof JSONArray    a) this.send(context, a);
 		
-		if (result instanceof View       v) this.render(context, v);
+		if (result instanceof View         v) this.render(context, v);
 		
 		// TODO: Add fallback
 	}
@@ -235,8 +235,8 @@ public class Rockstar extends HttpServlet {
 	}
 	*/
 
-	public static Map toMap(JSONObject input) {
-		TreeMap<String, Object> result = new TreeMap<String, Object>();
+	public static Map<String, Object> toMap(JSONObject input) {
+		TreeMap<String, Object> result = new TreeMap<>();
 		if (input == null) return result;
 		
 		Iterator<String> keys = input.keys();
@@ -260,7 +260,7 @@ public class Rockstar extends HttpServlet {
 		return result;
 	}
 	
-	public static List toList(JSONArray array) {
+	public static List<Object> toList(JSONArray array) {
 		ArrayList<Object> list = new ArrayList<>();
 		if (array == null) return list;
 		
@@ -282,7 +282,7 @@ public class Rockstar extends HttpServlet {
 		return list;
 	}
 	
-	public static JSONObject fromMap(Map map) {
+	public static JSONObject fromMap(Map<?,?> map) {
 		JSONObject result = new JSONObject();
 		if (map == null) return result;
 		
@@ -311,18 +311,18 @@ public class Rockstar extends HttpServlet {
 		return result;
 	}
 	
-	public static JSONArray fromList(List list) {
+	public static JSONArray fromList(List<?> list) {
 	 	JSONArray array = new JSONArray();
 		if (list == null) return array;
 		
 		for (Object value : list) {
-			if (value instanceof Map m) {
-				JSONObject inner = fromMap(m);
+			if (value instanceof Map<?,?> map) {
+				JSONObject inner = fromMap(map);
 				array.put(inner);
 				continue;
 			}
-			if (value instanceof List item) {
-				JSONArray inner = fromList(item);
+			if (value instanceof List<?> detail) {
+				JSONArray inner = fromList(detail);
 				array.put(inner);
 				continue;
 			}

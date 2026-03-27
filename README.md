@@ -144,7 +144,7 @@ class Web {
 
 Compile and run on Unix, macOS, Linux, ...
 ```bash
-CPATH=runtime/bobcat25.jar
+CPATH=runtime/bobcat26.jar
 CPATH=$CPATH:"runtime/jakarta-activation.jar"
 CPATH=$CPATH:"runtime/jakarta-mail.jar"
 CPATH=$CPATH:"runtime/json.jar"
@@ -161,12 +161,14 @@ java --class-path $CPATH Bobcat --deployment-descriptor web.xml --port 1800
 Compile and run on Windows
 
 ```
-set RUNTIME=runtime\bobcat25.jar
+set RUNTIME=runtime\bobcat26.jar
 set RUNTIME=%RUNTIME%;runtime\jakarta-activation.jar
 set RUNTIME=%RUNTIME%;runtime\jakarta-mail.jar
 set RUNTIME=%RUNTIME%;runtime\json.jar
 set RUNTIME=%RUNTIME%;runtime\mysql.jar
 set RUNTIME=%RUNTIME%;runtime\freemarker.jar
+set RUNTIME=%RUNTIME%;runtime\tomcat-embed-jasper.jar
+
 set RUNTIME=%RUNTIME%;runtime\
 
 javac -d runtime --class-path %RUNTIME% --source-path code code\web\framework\*.java
