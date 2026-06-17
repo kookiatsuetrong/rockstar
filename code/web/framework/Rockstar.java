@@ -32,11 +32,17 @@ public class Rockstar extends HttpServlet {
 		Rockstar.map.put(path, handler);
 	}
 	
-	static ArrayList<Handler> list = new ArrayList<>();
+	static ArrayList<Handler> fallback = new ArrayList<>();
+	static ArrayList<Handler> filter   = new ArrayList<>();
 	
 	public static void
 	addFallback(Handler handler) {
-		list.add(handler);
+		fallback.add(handler);
+	}
+	
+	public static void
+	addFilter(Handler handler) {
+		filter.add(handler);
 	}
 	
 	public static boolean
@@ -82,6 +88,13 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 		
 		Context context = new Context(request, response);
+		
+		// Each filter can modify pattern, by changing attribute
+		for (Handler f : filter) {
+			f.handle(context);
+			pattern = (String)context.request.getAttribute("pattern");
+		}
+		
 		Handler handler = map.get(pattern);
 		
 		// 1. Find internal handler
@@ -130,7 +143,7 @@ public class Rockstar extends HttpServlet {
 		} catch (Exception e) { }
 
 		// 4. Alias for fallback, such as /whatever-here
-		for (Handler target : list) {
+		for (Handler target : fallback) {
 			Object result = target.handle(context);
 			if (result == null) continue; // process next fallback
 			processHandler(context, result);
@@ -202,8 +215,6 @@ public class Rockstar extends HttpServlet {
 		if (result instanceof JSONArray    a) this.send(context, a);
 		
 		if (result instanceof View         v) this.render(context, v);
-		
-		// TODO: Add fallback
 	}
 	
 	void render(Context context, View view) {
@@ -254,8 +265,10 @@ public class Rockstar extends HttpServlet {
 				result.put(k, inner);
 				continue;
 			}
-			
-			result.put(k, value);
+			if (value == null) {
+				continue;
+			}
+			result.put(k, value.toString());
 		}
 		return result;
 	}
@@ -277,7 +290,11 @@ public class Rockstar extends HttpServlet {
 				list.add(inner);
 				continue;
 			}
-			list.add(value);
+			if (value == null) {
+				continue;
+			}
+			
+			list.add(value.toString());
 		}
 		return list;
 	}

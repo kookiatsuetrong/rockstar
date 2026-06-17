@@ -27,6 +27,10 @@ public class Freemarker {
 		}
 	}
 	
+	public static String render(String path) {
+		return render(path, null);
+	}
+	
 	public static String render(String path, Map<String,Object> data) {
 		try {
 			Template template = detail.getTemplate(path);
