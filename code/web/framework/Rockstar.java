@@ -79,6 +79,7 @@ public class Rockstar extends HttpServlet {
 		String verb = request.getMethod();
 		String uri  = request.getRequestURI();
 		String pattern = verb + " " + uri;
+		// The format pattern is: "GET /some-url" or "POST /upload"
 		
 		System.out.println("Request Pattern: " + pattern);
 		request.setAttribute("path", uri);
@@ -92,7 +93,10 @@ public class Rockstar extends HttpServlet {
 		// Each filter can modify pattern, by changing attribute
 		for (Handler f : filter) {
 			f.handle(context);
-			pattern = (String)context.request.getAttribute("pattern");
+			String output = (String)context.request.getAttribute("pattern");
+			if (valid(output)) {
+				pattern = output;
+			}
 		}
 		
 		Handler handler = map.get(pattern);
